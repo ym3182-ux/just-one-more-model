@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Just One More?</title>
+  <style>
+    :root { color: #243057; background: #fff8eb; font-family: ui-rounded, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; padding: 24px 16px; background: radial-gradient(circle at 12% 12%, #dff9ff 0 11%, transparent 12%), radial-gradient(circle at 90% 88%, #ffe0ef 0 14%, transparent 15%), #fff8eb; }
+    main { width: min(100%, 610px); margin: 0 auto; }
+    header { position: relative; padding: 25px 0 20px; text-align: center; }
+    header::before, header::after { position: absolute; color: #f2a900; font-size: 2.3rem; content: "✦"; animation: float 3s ease-in-out infinite; }
+    header::before { top: 4px; left: 7%; } header::after { right: 8%; bottom: 6px; color: #7a82e7; animation-delay: -1.5s; }
+    h1 { margin: 0; font-size: clamp(2.6rem, 11vw, 4.6rem); letter-spacing: -0.08em; line-height: 0.9; }
+    header p { margin: 13px 0 0; color: #6d7594; font-weight: 700; }
+    .app { overflow: hidden; border: 3px solid #243057; border-radius: 30px; background: #fff; box-shadow: 8px 9px 0 #243057; }
+    .screen { display: none; padding: clamp(24px, 6vw, 40px); } .screen.active { display: block; }
+    .eyebrow { margin: 0 0 6px; color: #e26d83; font-size: .78rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    h2 { margin: 0; font-size: clamp(1.8rem, 7vw, 2.8rem); letter-spacing: -.055em; line-height: 1.02; }
+    .intro { margin: 10px 0 22px; color: #69728d; line-height: 1.45; }
+    .intent-grid, .time-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+    .time-grid { grid-template-columns: repeat(3, 1fr); }
+    .label { display: block; margin: 24px 0 9px; color: #68728f; font-size: .75rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .choice { min-height: 110px; padding: 14px; border: 2px solid #243057; border-radius: 20px; background: #fffefb; color: #243057; text-align: left; transition: transform 160ms ease, background 160ms ease; }
+    .choice:hover, .choice:focus-visible, .choice.selected { transform: translateY(-4px) rotate(-1deg); background: #fff1a8; }
+    .choice-emoji { display: block; margin-bottom: 7px; font-size: 2rem; } .choice strong { display: block; font-size: .96rem; } .choice small { color: #67708a; }
+    .time-choice { min-height: 68px; padding: 8px; text-align: center; } .time-choice strong { font-size: 1.05rem; }
+    button { min-height: 50px; border: 2px solid #243057; border-radius: 15px; background: #6272e7; color: #fff; font: inherit; font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 #243057; }
+    button:hover, button:focus-visible { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #243057; }
+    button:disabled { background: #b7bfd7; color: #edf0f7; cursor: not-allowed; box-shadow: none; transform: none; }
+    .start { width: 100%; margin-top: 22px; } .mini-note, .disclosure { color: #758098; font-size: .82rem; line-height: 1.4; text-align: center; } .mini-note { margin: 20px 0 0; } .disclosure { margin: 18px 8px 0; font-size: .78rem; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+    .stat { padding: 10px 7px; border: 2px solid #243057; border-radius: 14px; background: #fff8d4; text-align: center; } .stat span { display: block; color: #616b89; font-size: .68rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; } .stat strong { display: block; margin-top: 3px; font-size: 1.15rem; }
+    .post { position: relative; min-height: 315px; overflow: hidden; padding: 25px; border: 3px solid #243057; border-radius: 24px; background: #e4ecff; }
+    .post::after { position: absolute; right: -28px; bottom: -35px; width: 150px; height: 150px; border-radius: 50%; background: var(--blob, #b8c7ff); content: ""; }
+    .post-emoji { position: relative; z-index: 1; display: grid; width: 84px; height: 84px; place-items: center; border: 3px solid #243057; border-radius: 26px; background: #fff; font-size: 3.4rem; transform: rotate(-5deg); }
+    .post-label { position: relative; z-index: 1; margin: 23px 0 6px; color: #52607f; font-size: .75rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .post h3 { position: relative; z-index: 1; max-width: 390px; margin: 0; font-size: clamp(1.7rem, 7vw, 2.6rem); letter-spacing: -.06em; line-height: 1.02; }
+    .pills { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; } .pill { padding: 6px 10px; border-radius: 999px; background: #fff; font-size: .75rem; font-weight: 900; } #matchNote.mismatch { background: #e26d83; color: #fff; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; } .stop { background: #fff; color: #243057; }
+    .reason-grid { display: grid; gap: 11px; } .reason { min-height: 70px; text-align: left; } .reason .choice-emoji { display: inline; margin-right: 8px; } .reason small { display: block; margin: 3px 0 0 34px; }
+    #summary { text-align: center; } .path { display: grid; gap: 10px; margin: 24px 0; text-align: left; } .path-row { display: flex; align-items: center; gap: 12px; padding: 13px; border: 2px solid #243057; border-radius: 16px; background: #f5f7ff; } .path-row span { font-size: 1.5rem; } .path-row small { display: block; color: #68728c; }
+    .reflection { padding: 17px; border-radius: 18px; background: #fff1a8; color: #354064; font-weight: 700; line-height: 1.42; } #restart { width: 100%; margin-top: 22px; background: #e26d83; }
+    @keyframes float { 50% { transform: translateY(-8px) rotate(15deg); } } @media (max-width: 390px) { .intent-grid, .actions { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1>Just one more?</h1><p>A playful model of intentions, content, and stopping.</p></header>
+    <section class="app" aria-label="Infinite scrolling model">
+      <section class="screen active" id="startScreen">
+        <p class="eyebrow">Build your path</p><h2>Why did you open the app?</h2><p class="intro">Choose a reason and a planned amount of time.</p>
+        <div class="intent-grid">
+          <button class="choice intent" data-intent="Find information" data-key="find" data-emoji="🔎"><span class="choice-emoji">🔎</span><strong>Find something</strong><small>Look up one thing</small></button>
+          <button class="choice intent" data-intent="Connect with people" data-key="connect" data-emoji="💬"><span class="choice-emoji">💬</span><strong>Connect</strong><small>See what friends shared</small></button>
+          <button class="choice intent" data-intent="Take a short break" data-key="break" data-emoji="☁️"><span class="choice-emoji">☁️</span><strong>Take a break</strong><small>Rest for a moment</small></button>
+          <button class="choice intent" data-intent="Avoid another task" data-key="avoid" data-emoji="🫠"><span class="choice-emoji">🫠</span><strong>Avoid a task</strong><small>Put something off</small></button>
+        </div>
+        <span class="label">I planned to stay for...</span>
+        <div class="time-grid"><button class="choice time-choice" data-time="1"><strong>1 min</strong></button><button class="choice time-choice" data-time="3"><strong>3 min</strong></button><button class="choice time-choice" data-time="5"><strong>5 min</strong></button></div>
+        <button class="start" id="begin" disabled>Start this path ✦</button><p class="mini-note">No option is “better.” This is a model, not a diagnosis.</p>
+      </section>
+      <section class="screen" id="feedScreen">
+        <div class="stats"><div class="stat"><span>Plan</span><strong id="planned">3m</strong></div><div class="stat"><span>Now</span><strong id="time">0m</strong></div><div class="stat"><span>Pull</span><strong id="pull">20</strong></div></div>
+        <article class="post" id="post"><div class="post-emoji" id="postEmoji">🗺️</div><p class="post-label" id="postLabel">Travel photo</p><h3 id="postTitle">A friend shared photos from a place you want to visit.</h3><div class="pills"><span class="pill" id="sourceTag">From a friend</span><span class="pill" id="matchNote">Matches your purpose</span></div></article>
+        <div class="actions"><button id="scrollButton">One more ✦</button><button id="stopButton" class="stop">Stop here</button></div><p class="disclosure">“Pull” is a made-up value for this model. It does not measure real motivation.</p>
+      </section>
+      <section class="screen" id="reasonScreen">
+        <p class="eyebrow">Pause for a second</p><h2>What made you continue?</h2><p class="intro">Choose the reason that feels closest. You can change your mind later.</p>
+        <div class="reason-grid">
+          <button class="choice reason" data-reason="Curiosity"><span class="choice-emoji">👀</span><strong>Curious</strong><small>I wanted to know what came next.</small></button>
+          <button class="choice reason" data-reason="Connection"><span class="choice-emoji">💬</span><strong>Connection</strong><small>I wanted to see people or updates.</small></button>
+          <button class="choice reason" data-reason="Fear of missing out"><span class="choice-emoji">😮</span><strong>Don't miss it</strong><small>I did not want to miss something.</small></button>
+        </div>
+      </section>
+      <section class="screen" id="summary">
+        <p class="eyebrow">You chose to stop</p><h2>What changed?</h2>
+        <div class="path">
+          <div class="path-row"><span id="summaryIntentIcon">☁️</span><div><strong>Your original reason</strong><small id="summaryIntent">Take a short break</small></div></div>
+          <div class="path-row"><span>⏱️</span><div><strong>Plan vs. model path</strong><small id="summaryTime">Planned 3m · Model 0m</small></div></div>
+          <div class="path-row"><span>📱</span><div><strong>Content and choices</strong><small id="summaryPath">0 posts</small></div></div>
+        </div>
+        <p class="reflection" id="reflection">Did the path still match your original reason for opening the app?</p><button id="restart">Try another path ↻</button><p class="disclosure">This model leaves out emotions, habits, relationships, accessibility needs, and real platform algorithms.</p>
+      </section>
+    </section>
+  </main>
+  <script>
+    const posts = [
+      { emoji: "🗺️", label: "Travel photo", title: "A friend shared photos from a place you want to visit.", source: "From a friend", pull: 15, matches: ["connect", "break"], color: "#dbe6ff", blob: "#aabfff" },
+      { emoji: "😲", label: "Short video", title: "A 20-second video promises a surprising ending.", source: "Recommended: similar watch", pull: 25, matches: ["break", "avoid"], color: "#ffe0cc", blob: "#ffb98c" },
+      { emoji: "🧠", label: "Study tip", title: "A post claims it has the one habit you need.", source: "Recommended: topic match", pull: 13, matches: ["find"], color: "#d9f3e3", blob: "#9bdab1" },
+      { emoji: "🍿", label: "Recommendation", title: "A show looks exactly like your kind of thing.", source: "Recommended: personal match", pull: 20, matches: ["break", "avoid"], color: "#eee0ff", blob: "#cfadff" },
+      { emoji: "📰", label: "Headline", title: "A headline gives only part of a story you care about.", source: "Trending now", pull: 18, matches: ["find"], color: "#daf2f4", blob: "#99dadd" }
+    ];
+    let purpose = "", purposeKey = "", purposeIcon = "", plannedTime = 0, time = 0, pull = 20, seenPosts = 0, matchCount = 0, mismatchCount = 0, continued = 0, reasons = [];
+    const screens = { start: document.querySelector("#startScreen"), feed: document.querySelector("#feedScreen"), reason: document.querySelector("#reasonScreen"), summary: document.querySelector("#summary") };
+    function changeScreen(name) { Object.values(screens).forEach((screen) => screen.classList.remove("active")); screens[name].classList.add("active"); }
+    function readyToBegin() { document.querySelector("#begin").disabled = !(purpose && plannedTime); }
+    function updateStats() { document.querySelector("#planned").textContent = plannedTime + "m"; document.querySelector("#time").textContent = time + "m"; document.querySelector("#pull").textContent = pull; }
+    function showPost(countAsScroll = true) {
+      const post = posts[Math.floor(Math.random() * posts.length)]; const matches = post.matches.includes(purposeKey);
+      document.querySelector("#postEmoji").textContent = post.emoji; document.querySelector("#postLabel").textContent = post.label; document.querySelector("#postTitle").textContent = post.title; document.querySelector("#sourceTag").textContent = post.source;
+      const note = document.querySelector("#matchNote"); note.textContent = matches ? "Matches your purpose" : "Different from your purpose"; note.classList.toggle("mismatch", !matches);
+      document.querySelector("#post").style.background = post.color; document.querySelector("#post").style.setProperty("--blob", post.blob);
+      seenPosts += 1; if (matches) matchCount += 1; else mismatchCount += 1;
+      if (countAsScroll) { time += 1; continued += 1; pull = Math.min(100, pull + post.pull + (matches ? 4 : 10)); } updateStats();
+    }
+    function continuePath() { if (continued > 0 && continued % 2 === 0) changeScreen("reason"); else showPost(); }
+    function stop() {
+      document.querySelector("#summaryIntentIcon").textContent = purposeIcon; document.querySelector("#summaryIntent").textContent = purpose;
+      document.querySelector("#summaryTime").textContent = "Planned " + plannedTime + "m · Model " + time + "m";
+      const reasonText = reasons.length ? " Reasons chosen: " + reasons.join(", ") + "." : " No reason check-in appeared on this path.";
+      document.querySelector("#summaryPath").textContent = seenPosts + " posts · " + matchCount + " matched · " + mismatchCount + " different." + reasonText;
+      document.querySelector("#reflection").textContent = time > plannedTime ? "In this model, the path went beyond the planned time. Which choices came from your original purpose, and which were shaped by the posts shown?" : "In this model, you stopped within your planned time. Did the content you saw still match your original purpose?";
+      changeScreen("summary");
+    }
+    document.querySelectorAll(".intent").forEach((button) => button.addEventListener("click", () => { document.querySelectorAll(".intent").forEach((item) => item.classList.remove("selected")); button.classList.add("selected"); purpose = button.dataset.intent; purposeKey = button.dataset.key; purposeIcon = button.dataset.emoji; readyToBegin(); }));
+    document.querySelectorAll(".time-choice").forEach((button) => button.addEventListener("click", () => { document.querySelectorAll(".time-choice").forEach((item) => item.classList.remove("selected")); button.classList.add("selected"); plannedTime = Number(button.dataset.time); readyToBegin(); }));
+    document.querySelector("#begin").addEventListener("click", () => { time = 0; pull = 20; seenPosts = 0; matchCount = 0; mismatchCount = 0; continued = 0; reasons = []; updateStats(); changeScreen("feed"); showPost(false); });
+    document.querySelector("#scrollButton").addEventListener("click", continuePath); document.querySelector("#stopButton").addEventListener("click", stop);
+    document.querySelectorAll("[data-reason]").forEach((button) => button.addEventListener("click", () => { reasons.push(button.dataset.reason); changeScreen("feed"); showPost(); }));
+    document.querySelector("#restart").addEventListener("click", () => { purpose = ""; plannedTime = 0; document.querySelectorAll(".selected").forEach((item) => item.classList.remove("selected")); document.querySelector("#begin").disabled = true; changeScreen("start"); });
+  </script>
+</body>
+</html>
